@@ -1,8 +1,17 @@
 package coreUtilities.utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -29,7 +38,44 @@ public class FileOperations {
 	 */
 	public Map<String, String> readExcelPOI(String excelFilePath, String sheetName) throws Exception {
 		// Create a Map to store key-value pairs from the Excel file
-		return null;
+		Map<String, String> dataMap = new HashMap<>();
+
+		// Create a FileInputStream object to read the Excel file
+		FileInputStream fileInputStream = new FileInputStream(new File(excelFilePath));
+
+		// Create a Workbook object using the WorkbookFactory
+		Workbook workbook = WorkbookFactory.create(fileInputStream);
+
+		// Get the sheet from the workbook
+		Sheet sheet = workbook.getSheet(sheetName);
+
+		// Iterate through each row in the sheet
+		for (Row row : sheet) {
+			// Assuming the first column contains the key and the second column contains the
+			// value
+			Cell keyCell = row.getCell(0);
+			Cell valueCell = row.getCell(1);
+
+			if (keyCell != null && valueCell != null) {
+				// Convert the cell type to STRING if it is not already STRING
+				if (keyCell.getCellType() != CellType.STRING) {
+					keyCell.setCellType(CellType.STRING);
+				}
+				if (valueCell.getCellType() != CellType.STRING) {
+					valueCell.setCellType(CellType.STRING);
+				}
+
+				// Store the key-value pair in the Map
+				dataMap.put(keyCell.getStringCellValue(), valueCell.getStringCellValue());
+			}
+		}
+
+		// Close the workbook and file stream
+		workbook.close();
+		fileInputStream.close();
+
+		// Return the data map
+		return dataMap;
 	}
 
 }
